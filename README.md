@@ -10,13 +10,11 @@ When docked at a station, press the configurable hotkey (default: backspace) to 
 
 Check the box to attempt automatic "full repair" when docking.  If you can't afford it, it will just fail with the usual message as if you clicked the button.
 
-For the remaining items:
- "-1" will mean "no action" for an item type.
- Any other positive whole number will be fulfilled if possible.
+For the remaining items, -1 will mean "no action" for an item type.  Any other positive whole number will be fulfilled if possible.
   
 The game's "buyX" and "sellX" functions are used, so normal errors should appear.  Not tested what happens if you can't afford something.
   
-If the station doesn't stock something i.e. doesn't trade in that thing, a message will appear in the scrolling menu at the bottom right (same place as crew evolution stuff).
+If the station doesn't stock something i.e. doesn't trade in that thing, a message will appear in the scrolling menu at the bottom right (same place as crew evolution stuff).  If the station doesn't have enough of a thing, mod will buy what's available.  
   
 Install  
 =======  
