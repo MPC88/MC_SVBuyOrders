@@ -1,6 +1,4 @@
 # MC_SVBuyOrders
-
-# MC_SVEquipmentStackSplit
   
 Backup your save before using any mods.  
   
