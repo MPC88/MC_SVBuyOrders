@@ -15,7 +15,7 @@ namespace MC_SVBuyOrders
     {
         public const string pluginGuid = "mc.starvalor.buyorders";
         public const string pluginName = "SV Buy Orders";
-        public const string pluginVersion = "0.0.1";
+        public const string pluginVersion = "0.0.2";
         private const string modSaveFolder = "/MCSVSaveData/";  // /SaveData/ sub folder
         private const string modSaveFilePrefix = "BuyOrders_"; // modSaveFlePrefixNN.dat
 
@@ -218,20 +218,53 @@ namespace MC_SVBuyOrders
             // Now do buy or sell
             if (cargoItemIndex > -1 && playerCS.cargo[cargoItemIndex].qnt > dataEntry)
             {
-                // Select item
-                Inventory playerInv = (Inventory)AccessTools.Field(typeof(DockingUI), "inventory").GetValue(dockingUI);
-                AccessTools.Field(typeof(Inventory), "currStation").SetValue(playerInv, dockingUI.station);
-                AccessTools.Field(typeof(Inventory), "selectedItem").SetValue(playerInv, cargoItemIndex);
-                AccessTools.Field(typeof(Inventory), "cargoMode").SetValue(playerInv, 0);
-                AccessTools.Field(typeof(Inventory), "selectedSlot").SetValue(playerInv, 0);
-
                 // Sell
+                CargoItem cargoItem = playerCS.cargo[cargoItemIndex];                
                 int sellQnt = playerCS.cargo[cargoItemIndex].qnt - dataEntry;
-                playerInv.SellCargoItem(sellQnt);
-
-                // Reset inventory selections to avoid shenanigans from external manipulation
-                AccessTools.Field(typeof(Inventory), "selectedItem").SetValue(playerInv, -1);
-                AccessTools.Field(typeof(Inventory), "selectedSlot").SetValue(playerInv, -1);
+                GenericCargoItem genericCargoItem = new GenericCargoItem(cargoItem.itemType, cargoItem.itemID, cargoItem.rarity, dockingUI.station.market, null, null, cargoItem.extraData);                
+                genericCargoItem.unitPrice = MarketSystem.GetTradeModifier(genericCargoItem.unitPrice, cargoItem.itemType, cargoItem.itemID, true, dockingUI.station.factionIndex, GameManager.instance.Player.GetComponent<SpaceShip>());                
+                if(genericCargoItem.unitPrice != -1f)
+                {
+                    playerCS.RemoveItem(cargoItemIndex, sellQnt);
+                    playerCS.credits += genericCargoItem.unitPrice * (float)sellQnt;
+                    bool flag2 = false;
+                    if (cargoItem.itemType == 3)
+                    {
+                        if (genericCargoItem.unitPrice * (float)sellQnt > 20000f && PChar.GetRepRank(1) >= 2 && PChar.GetRepRank(2) >= 2 && (PChar.HasPerk(1) || PChar.HasPerk(2)) && GameData.data.difficulty >= 0)
+                        {
+                            QuestDB.StartQuest(126, 0, false);
+                        }
+                        flag2 = (cargoItem.itemID == 54);
+                        float num = cargoItem.pricePaid;
+                        bool flag3 = true;
+                        if (num == 0f)
+                        {
+                            num = ItemDB.GetItem(cargoItem.itemID).basePrice;
+                            flag3 = false;
+                        }
+                        float num2 = genericCargoItem.unitPrice * (float)sellQnt - num * (float)sellQnt;
+                        num2 *= 0.5f;
+                        if (num2 > 0f)
+                        {
+                            int num3 = Mathf.RoundToInt(num2 * (1f - (float)PChar.Char.level * 0.01f));
+                            if (!flag3)
+                            {
+                                num3 /= 2;
+                            }
+                            PChar.EarnXP((float)num3, 4, -1);
+                        }
+                    }
+                    if (!flag2 && MarketSystem.AlterItemStock(dockingUI.station.market, cargoItem.itemType, cargoItem.itemID, cargoItem.rarity, sellQnt) < 0 && cargoItem.rarity >= 1)
+                    {
+                        MarketItem item = new MarketItem(cargoItem.itemType, cargoItem.itemID, cargoItem.rarity, 1, cargoItem.extraData);
+                        dockingUI.station.market.Add(item);
+                        MarketSystem.SortMarket(dockingUI.station.market);
+                    }
+                    playerCS.UpdateAmmoBuffers();
+                    Inventory inv = GameObject.FindGameObjectWithTag("MainCanvas").transform.Find("Inventory").GetComponent<Inventory>();
+                    inv.transform.parent.Find("PlayerUI").GetComponent<PlayerUIControl>().UpdateUI();
+                    SoundSys.PlaySound(20, true);
+                }
             }
             else if ((cargoItemIndex > -1 && playerCS.cargo[cargoItemIndex].qnt < dataEntry) ||
                 cargoItemIndex == -1 && dataEntry > 0)
