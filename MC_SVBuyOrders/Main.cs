@@ -15,7 +15,7 @@ namespace MC_SVBuyOrders
     {
         public const string pluginGuid = "mc.starvalor.buyorders";
         public const string pluginName = "SV Buy Orders";
-        public const string pluginVersion = "0.0.2";
+        public const string pluginVersion = "1.0.0";
         private const string modSaveFolder = "/MCSVSaveData/";  // /SaveData/ sub folder
         private const string modSaveFilePrefix = "BuyOrders_"; // modSaveFlePrefixNN.dat
 
@@ -30,7 +30,6 @@ namespace MC_SVBuyOrders
         internal static PersistentData data;
         internal static ManualLogSource log = BepInEx.Logging.Logger.CreateLogSource(pluginName);
 
-        public ConfigEntry<KeyCodeSubset> configKey;
         private static bool docked = false;
 
         public void Awake()
@@ -40,18 +39,6 @@ namespace MC_SVBuyOrders
             Assets.LoadAssets($"{pluginfolder}\\{bundleName}");
 
             Harmony.CreateAndPatchAll(typeof(Main));
-
-            configKey = Config.Bind<KeyCodeSubset>(
-                "Config",
-                "Open Buy Order Config",
-                KeyCodeSubset.Backspace,
-                "Opens configuration menu when docked");
-        }
-
-        public void Update()
-        {
-            if (docked && Input.GetKeyDown((KeyCode)configKey.Value) && !UI.active)
-                UI.ShowConfigPanel(data);
         }
 
         [HarmonyPatch(typeof(MenuControl), nameof(MenuControl.LoadGame))]

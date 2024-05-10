@@ -13,7 +13,7 @@ namespace MC_SVBuyOrders
     internal class UI
     {
         internal static bool active = false;
-        private static GameObject btnConfig;
+        internal static GameObject btnConfig;
         private static GameObject pnlMain;
         private static Toggle tglAutoRep;
         private static InputField inputECells;
@@ -29,23 +29,21 @@ namespace MC_SVBuyOrders
                 return;
 
             // Open panel button
-            //GameObject src = ((GameObject)AccessTools.Field(typeof(DockingUI), "lobbyPanel").GetValue(dockingUI)).transform.Find("MainButtons").gameObject.GetComponentInChildren<Button>().gameObject;
-            //btnConfig = GameObject.Instantiate(src);
-            //btnConfig.name = "BtnConfigAutoBuy";
-            //btnConfig.SetActive(true);
-            //btnConfig.GetComponentInChildren<Text>().text = "Auto Buy";
-            //RectTransform rt = btnConfig.GetComponent<RectTransform>();
-            //ButtonClickedEvent configBCE = new Button.ButtonClickedEvent();
-            //configBCE.AddListener(btnConfig_Click);
-            //btnConfig.GetComponentInChildren<Button>().onClick = configBCE;
-            //btnConfig.transform.SetParent(src.transform.parent.parent.parent, true);
-            //btnConfig.layer = src.layer;
-            //btnConfig.transform.localScale = src.transform.localScale;
-            //btnConfig.transform.localPosition = new Vector3(
-            //    src.transform.localPosition.x,
-            //    src.transform.localPosition.y + 20,
-            //    src.transform.localPosition.z);
-            //btnConfig.SetActive(false);
+            Transform lobbyPanel = ((GameObject)AccessTools.FieldRefAccess<DockingUI, GameObject>("lobbyPanel")(dockingUI)).transform;
+            GameObject src = lobbyPanel.GetChild(1).GetChild(0).GetChild(2).gameObject;
+            btnConfig = GameObject.Instantiate(src);
+            btnConfig.name = "BtnConfigAutoBuy";
+            btnConfig.SetActive(true);
+            btnConfig.GetComponentInChildren<Text>().text = "Auto Trade";
+            RectTransform rt = btnConfig.GetComponent<RectTransform>();
+            ButtonClickedEvent configBCE = new Button.ButtonClickedEvent();
+            configBCE.AddListener(btnConfig_Click);
+            btnConfig.GetComponentInChildren<Button>().onClick = configBCE;
+            btnConfig.transform.SetParent(lobbyPanel, true);
+            btnConfig.transform.localScale = src.transform.localScale;
+            RectTransform lobPanRect = lobbyPanel.GetComponent<RectTransform>();
+            btnConfig.transform.localPosition = new Vector3(-495, 309, 0);
+            btnConfig.SetActive(false);
 
             // Get mod UI game objects
             pnlMain = GameObject.Instantiate(Assets.pnlMain);
@@ -72,8 +70,9 @@ namespace MC_SVBuyOrders
         }
 
         internal static void ShowConfigButton(bool state)
-        {            
-            //btnConfig.SetActive(state);
+        {   
+            if(btnConfig != null)
+                btnConfig.SetActive(state);
         }
 
         internal static void CloseAndHideAll()
