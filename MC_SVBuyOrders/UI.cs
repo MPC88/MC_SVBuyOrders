@@ -13,7 +13,7 @@ namespace MC_SVBuyOrders
     internal class UI
     {
         internal static bool active = false;
-        internal static GameObject btnConfig;
+        private static GameObject btnConfig;
         private static GameObject pnlMain;
         private static Toggle tglAutoRep;
         private static InputField inputECells;
