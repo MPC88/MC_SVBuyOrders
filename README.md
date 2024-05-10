@@ -6,8 +6,8 @@ Uninstall any mods and attempt to replicate issues before reporting any suspecte
   
 Function  
 ========  
-When docked at a station, press the configurable hotkey (default: backspace) to open the auto buy configuration menu on the lobby panel.  
-
+When docked at a station, click Auto Trade button at the top-left above the repair buttons.    
+  
 Check the box to attempt automatic "full repair" when docking.  If you can't afford it, it will just fail with the usual message as if you clicked the button.
 
 For the remaining items, -1 will mean "no action" for an item type.  Any other positive whole number will be fulfilled if possible (automatic buying and selling).
