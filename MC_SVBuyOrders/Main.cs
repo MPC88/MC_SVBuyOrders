@@ -30,8 +30,6 @@ namespace MC_SVBuyOrders
         internal static PersistentData data;
         internal static ManualLogSource log = BepInEx.Logging.Logger.CreateLogSource(pluginName);
 
-        private static bool docked = false;
-
         public void Awake()
         {
             string pluginfolder = System.IO.Path.GetDirectoryName(GetType().Assembly.Location);
@@ -132,14 +130,12 @@ namespace MC_SVBuyOrders
             }
             
             DoOrder(__instance);
-            docked = true;
         }
 
         [HarmonyPatch(typeof(DockingUI), nameof(DockingUI.CloseDockingStation))]
         [HarmonyPrefix]
         private static void DockingUICloseDockingStation_Pre()
         {
-            docked = false;
             UI.CloseAndHideAll();
         }
 
