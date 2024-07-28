@@ -15,7 +15,7 @@ namespace MC_SVBuyOrders
     {
         public const string pluginGuid = "mc.starvalor.buyorders";
         public const string pluginName = "SV Buy Orders";
-        public const string pluginVersion = "1.0.0";
+        public const string pluginVersion = "1.1.0";
         private const string modSaveFolder = "/MCSVSaveData/";  // /SaveData/ sub folder
         private const string modSaveFilePrefix = "BuyOrders_"; // modSaveFlePrefixNN.dat
 
@@ -269,6 +269,17 @@ namespace MC_SVBuyOrders
                     AccessTools.FieldRefAccess<DockingUI, GameObject>("craftingPanel")(dockingUI).activeSelf)
                     AccessTools.Method(typeof(GameObject), nameof(GameObject.SetActive)).Invoke(
                         AccessTools.Field(typeof(Market), "shipDataScreen").GetValue(stationMarket), new object[] { false });
+            }
+        }
+
+        [HarmonyPatch(typeof(MenuControl), nameof(MenuControl.DeleteSaveGame))]
+        [HarmonyPrefix]
+        private static void DeleteSave_Pre()
+        {
+            if (GameData.ExistsAnySaveFile(GameData.gameFileIndex) &&
+                File.Exists(Application.dataPath + GameData.saveFolderName + modSaveFolder + modSaveFilePrefix + GameData.gameFileIndex.ToString("00") + ".dat"))
+            {
+                File.Delete(Application.dataPath + GameData.saveFolderName + modSaveFolder + modSaveFilePrefix + GameData.gameFileIndex.ToString("00") + ".dat");
             }
         }
     }
