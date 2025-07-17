@@ -30,6 +30,8 @@ namespace MC_SVBuyOrders
         internal static PersistentData data;
         internal static ManualLogSource log = BepInEx.Logging.Logger.CreateLogSource(pluginName);
 
+        private static bool newGame = false;
+
         public void Awake()
         {
             string pluginfolder = System.IO.Path.GetDirectoryName(GetType().Assembly.Location);
@@ -38,6 +40,15 @@ namespace MC_SVBuyOrders
 
             Harmony.CreateAndPatchAll(typeof(Main));
         }
+
+        [HarmonyPatch(typeof(MenuControl), nameof(MenuControl.PrepareNewGame))]
+        [HarmonyPostfix]
+        private static void MenuControlPrepNewGame_Post()
+        {
+            newGame = true;
+        }
+
+
 
         [HarmonyPatch(typeof(MenuControl), nameof(MenuControl.LoadGame))]
         [HarmonyPostfix]
@@ -128,7 +139,13 @@ namespace MC_SVBuyOrders
                     data = new PersistentData();
                 UI.ShowConfigButton(true);
             }
-            
+
+            if (newGame)
+            {
+                data = new PersistentData();
+                newGame = false;
+            }
+
             DoOrder(__instance);
         }
 
