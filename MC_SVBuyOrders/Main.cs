@@ -145,7 +145,7 @@ namespace MC_SVBuyOrders
             if (data.autoRep)
                 dockingUI.RepairShip(true);
 
-            if (dockingUI.station.GetMarket == null)
+            if (dockingUI.station.GetMarketList == null)
                 SideInfo.AddMsg("Buy order: No market at this station.");
 
             DoOrderForItem(idEnergyCells, data.energyCells, dockingUI);
@@ -181,11 +181,11 @@ namespace MC_SVBuyOrders
             // Get item from market
             int marketItemIndex = -1;
             Market stationMarket = ((GameObject)AccessTools.Field(typeof(DockingUI), "marketPanel").GetValue(dockingUI)).GetComponent<Market>();
-            if(stationMarket.market == null || stationMarket.market.Count == 0)
-                stationMarket.market = dockingUI.station.GetMarket;
-            for (int miIndex = 0; miIndex < stationMarket.market.Count; miIndex++)
+            if(stationMarket.marketList == null || stationMarket.marketList.Count == 0)
+                stationMarket.marketList = dockingUI.station.GetMarketList;
+            for (int miIndex = 0; miIndex < stationMarket.marketList.Count; miIndex++)
             {
-                MarketItem mi = stationMarket.market[miIndex];
+                MarketItem mi = stationMarket.marketList[miIndex];
                 if (mi.itemType == 3 && mi.itemID == itemID)
                 {
                     marketItemIndex = miIndex;
@@ -204,7 +204,7 @@ namespace MC_SVBuyOrders
                 // Sell
                 CargoItem cargoItem = playerCS.cargo[cargoItemIndex];                
                 int sellQnt = playerCS.cargo[cargoItemIndex].qnt - dataEntry;
-                GenericCargoItem genericCargoItem = new GenericCargoItem(cargoItem.itemType, cargoItem.itemID, cargoItem.rarity, dockingUI.station.GetMarket, null, null, cargoItem.extraData);                
+                GenericCargoItem genericCargoItem = new GenericCargoItem(cargoItem.itemType, cargoItem.itemID, cargoItem.rarity, dockingUI.station, null, null, cargoItem.extraData);                
                 genericCargoItem.unitPrice = MarketSystem.GetTradeModifier(genericCargoItem.unitPrice, cargoItem.itemType, cargoItem.itemID, true, dockingUI.station.factionIndex, GameManager.instance.Player.GetComponent<SpaceShip>());                
                 if(genericCargoItem.unitPrice != -1f)
                 {
@@ -237,11 +237,11 @@ namespace MC_SVBuyOrders
                             PChar.EarnXP((float)num3, 4, -1);
                         }
                     }
-                    if (!flag2 && MarketSystem.AlterItemStock(dockingUI.station.GetMarket, cargoItem.itemType, cargoItem.itemID, cargoItem.rarity, sellQnt) < 0 && cargoItem.rarity >= 1)
+                    if (!flag2 && MarketSystem.AlterItemStock(dockingUI.station.GetMarketList, cargoItem.itemType, cargoItem.itemID, cargoItem.rarity, sellQnt) < 0 && cargoItem.rarity >= 1)
                     {
                         MarketItem item = new MarketItem(cargoItem.itemType, cargoItem.itemID, cargoItem.rarity, cargoItem.extraData);
-                        dockingUI.station.GetMarket.Add(item);
-                        MarketSystem.SortMarket(dockingUI.station.GetMarket);
+                        dockingUI.station.GetMarketList.Add(item);
+                        MarketSystem.SortMarket(dockingUI.station.GetMarketList);
                     }
                     playerCS.UpdateAmmoBuffers();
                     Inventory inv = GameObject.FindGameObjectWithTag("MainCanvas").transform.Find("Inventory").GetComponent<Inventory>();
@@ -259,8 +259,8 @@ namespace MC_SVBuyOrders
                 int buyQnt = dataEntry;
                 if (cargoItemIndex > -1)
                     buyQnt -= playerCS.cargo[cargoItemIndex].qnt;
-                if (stationMarket.market[marketItemIndex].Stock < buyQnt)
-                    buyQnt = stationMarket.market[marketItemIndex].Stock;
+                if (stationMarket.marketList[marketItemIndex].Stock < buyQnt)
+                    buyQnt = stationMarket.marketList[marketItemIndex].Stock;
                 stationMarket.BuyMarketItem(buyQnt);
 
                 // Reset market selectiosn to avoid shenanigans from external manipulation
