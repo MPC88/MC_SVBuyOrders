@@ -15,7 +15,7 @@ namespace MC_SVBuyOrders
     {
         public const string pluginGuid = "mc.starvalor.buyorders";
         public const string pluginName = "SV Buy Orders";
-        public const string pluginVersion = "1.1.1";
+        public const string pluginVersion = "1.1.2";
         private const string modSaveFolder = "/MCSVSaveData/";  // /SaveData/ sub folder
         private const string modSaveFilePrefix = "BuyOrders_"; // modSaveFlePrefixNN.dat
 
@@ -31,7 +31,6 @@ namespace MC_SVBuyOrders
         internal static ManualLogSource log = BepInEx.Logging.Logger.CreateLogSource(pluginName);
 
         private static bool newGame = false;
-        private static int dockMode = 0;
 
         public void Awake()
         {
@@ -147,9 +146,8 @@ namespace MC_SVBuyOrders
                 newGame = false;
             }
 
-            dockMode = mode;
-
-            DoOrder(__instance);
+            if(mode == 0)
+                DoOrder(__instance);
         }
 
         [HarmonyPatch(typeof(DockingUI), nameof(DockingUI.CloseDockingStation))]
@@ -163,13 +161,8 @@ namespace MC_SVBuyOrders
         {
             // Repair            
             if (data.autoRep)
-            {
-                if(dockMode == 0)
-                    dockingUI.RepairShip(true);
-                else
-                    SideInfo.AddMsg("Buy order: No repair facility at this station.");
-            }
-            
+                dockingUI.RepairShip(true);
+                        
             if (dockingUI.station.hasMarket)
             {
                 DoOrderForItem(idEnergyCells, data.energyCells, dockingUI);
