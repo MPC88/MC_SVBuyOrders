@@ -15,7 +15,7 @@ namespace MC_SVBuyOrders
     {
         public const string pluginGuid = "mc.starvalor.buyorders";
         public const string pluginName = "SV Buy Orders";
-        public const string pluginVersion = "1.1.0";
+        public const string pluginVersion = "1.1.1";
         private const string modSaveFolder = "/MCSVSaveData/";  // /SaveData/ sub folder
         private const string modSaveFilePrefix = "BuyOrders_"; // modSaveFlePrefixNN.dat
 
@@ -31,6 +31,7 @@ namespace MC_SVBuyOrders
         internal static ManualLogSource log = BepInEx.Logging.Logger.CreateLogSource(pluginName);
 
         private static bool newGame = false;
+        private static int dockMode = 0;
 
         public void Awake()
         {
@@ -129,7 +130,7 @@ namespace MC_SVBuyOrders
 
         [HarmonyPatch(typeof(DockingUI), nameof(DockingUI.StartDockingStation))]
         [HarmonyPostfix]
-        private static void DockingUIStartDocking_Post(DockingUI __instance)
+        private static void DockingUIStartDocking_Post(DockingUI __instance, int mode)
         {
             UI.Initialise(__instance);
 
@@ -146,6 +147,8 @@ namespace MC_SVBuyOrders
                 newGame = false;
             }
 
+            dockMode = mode;
+
             DoOrder(__instance);
         }
 
@@ -158,19 +161,28 @@ namespace MC_SVBuyOrders
 
         private static void DoOrder(DockingUI dockingUI)
         {
-            // Repair
+            // Repair            
             if (data.autoRep)
-                dockingUI.RepairShip(true);
-
-            if (dockingUI.station.GetMarketList == null)
+            {
+                if(dockMode == 0)
+                    dockingUI.RepairShip(true);
+                else
+                    SideInfo.AddMsg("Buy order: No repair facility at this station.");
+            }
+            
+            if (dockingUI.station.hasMarket)
+            {
+                DoOrderForItem(idEnergyCells, data.energyCells, dockingUI);
+                DoOrderForItem(idVulcanAmmo, data.vulcanAmmo, dockingUI);
+                DoOrderForItem(idCannonAmmo, data.cannonAmmo, dockingUI);
+                DoOrderForItem(idRailgunAmmo, data.railgunAmmo, dockingUI);
+                DoOrderForItem(idMissileAmmo, data.missileAmmo, dockingUI);
+                DoOrderForItem(idDroneParts, data.droneParts, dockingUI);
+            }
+            else
+            {
                 SideInfo.AddMsg("Buy order: No market at this station.");
-
-            DoOrderForItem(idEnergyCells, data.energyCells, dockingUI);
-            DoOrderForItem(idVulcanAmmo, data.vulcanAmmo, dockingUI);
-            DoOrderForItem(idCannonAmmo, data.cannonAmmo, dockingUI);
-            DoOrderForItem(idRailgunAmmo, data.railgunAmmo, dockingUI);
-            DoOrderForItem(idMissileAmmo, data.missileAmmo, dockingUI);
-            DoOrderForItem(idDroneParts, data.droneParts, dockingUI);
+            }
         }
 
         private static void DoOrderForItem(int itemID, int dataEntry, DockingUI dockingUI)
@@ -197,7 +209,7 @@ namespace MC_SVBuyOrders
 
             // Get item from market
             int marketItemIndex = -1;
-            Market stationMarket = ((GameObject)AccessTools.Field(typeof(DockingUI), "marketPanel").GetValue(dockingUI)).GetComponent<Market>();
+            Market stationMarket = ((GameObject)AccessTools.Field(typeof(DockingUI), "marketPanel").GetValue(dockingUI)).GetComponent<Market>();            
             if(stationMarket.marketList == null || stationMarket.marketList.Count == 0)
                 stationMarket.marketList = dockingUI.station.GetMarketList;
             for (int miIndex = 0; miIndex < stationMarket.marketList.Count; miIndex++)
