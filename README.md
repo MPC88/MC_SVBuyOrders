@@ -18,7 +18,7 @@ If the station doesn't stock something i.e. doesn't trade in that thing, a messa
   
 Install  
 =======  
-1. Install BepInEx - https://docs.bepinex.dev/articles/user_guide/installation/index.html Stable version 5.4.21 x86.  
+1. Install BepInEx - https://docs.bepinex.dev/articles/user_guide/installation/index.html Stable version 5.4.21 x46.  
 2. Run the game at least once to initialise BepInEx and quit.  
 3. Download latest mod release.  
 4. Place MC_SVBuyOrders.dll and mc_svbuyorders in .\SteamLibrary\steamapps\common\Star Valor\BepInEx\plugins\  
